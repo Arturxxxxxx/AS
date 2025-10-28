@@ -1,0 +1,33 @@
+# ===== Stage 1: Builder =====
+FROM python:3.10-slim as builder
+
+WORKDIR /usr/src/app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends gcc
+RUN pip install --upgrade pip
+
+COPY ./requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+COPY . /usr/src/app/
+
+# ===== Stage 2: Final =====
+FROM python:3.10-slim
+
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+WORKDIR $APP_HOME
+
+RUN apt-get update && apt-get install -y --no-install-recommends netcat-traditional
+COPY --from=builder /usr/src/app/wheels /wheels
+COPY --from=builder /usr/src/app/requirements.txt .
+RUN pip install --upgrade pip && pip install --no-cache /wheels/*
+
+COPY ./entrypoint.prod.sh .
+RUN sed -i 's/\r$//g' $APP_HOME/entrypoint.prod.sh && chmod +x $APP_HOME/entrypoint.prod.sh
+
+COPY . $APP_HOME
+RUN python manage.py collectstatic --noinput
+
+ENTRYPOINT ["/home/app/web/entrypoint.prod.sh"]

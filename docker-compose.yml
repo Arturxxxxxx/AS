@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: menu_db
+    restart: always
+    env_file:
+      - ./.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  web:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: menu_web
+    command: gunicorn root.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    expose:
+      - 8000
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/media
+    restart: always
+
+  nginx:
+    build: ./nginx
+    container_name: menu_nginx
+    restart: always
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/media
+    ports:
+      - "1337:80"
+    depends_on:
+      - web
+
+  front:
+    image: nginx:alpine
+    container_name: menu_front
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./dist/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
