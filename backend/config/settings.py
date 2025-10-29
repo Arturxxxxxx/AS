@@ -25,7 +25,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG')
 
-ALLOWED_HOSTS = [config('ALLOWED_HOST')]
+ALLOWED_HOSTS = ['5.59.233.73', 'cikolataas.com']
 
 
 # Application definition
@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'drf_spectacular',
-    'app'
+    'app',
 ]
 
 MIDDLEWARE = [
@@ -92,6 +92,10 @@ DATABASES = {
         'HOST': config('POSTGRES_HOST')
     }
 }
+CSRF_TRUSTED_ORIGINS = [
+    "https://cikolataas.com",
+    "https://www.cikolataas.com",
+]
 
 
 # Password validation
@@ -127,8 +131,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATIC_URL = 'static/'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
