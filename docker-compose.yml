@@ -26,10 +26,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
 
     expose:
       - 8000
     volumes:
+      - ./backend/credentials:/home/app/backend/credentials:ro
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/media
     restart: always
@@ -49,6 +52,17 @@ services:
       - "443:443"
     depends_on:
       - web
+
+  redis:
+    image: redis:7-alpine
+    container_name: menu_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build:

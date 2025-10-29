@@ -157,6 +157,17 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",  # имя сервиса в docker-compose
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "TIMEOUT": 60 * 60 * 24,  # 24 часа
+    }
+}
+
 
 # Если нужно принимать куки/авторизацию с фронта:
 # CORS_ALLOW_CREDENTIALS = config('CORS_ALLOW_CREDENTIALS', default=False, cast=bool)
