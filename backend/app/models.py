@@ -14,7 +14,7 @@ class ProductDessert(models.Model):
     name = models.CharField(max_length=50, verbose_name='название')
     description = models.CharField(max_length=150, verbose_name='описание', null=True, blank=True)
     image = models.ImageField(upload_to='product/', verbose_name='фотография')
-    size = models.CharField(max_length=50, verbose_name='размер')
+    size = models.CharField(max_length=50, verbose_name='размер', null=True, blank=True)
     price = models.CharField(max_length=20, verbose_name='цена')
     currency = models.CharField(max_length=30, default='сом')
 

@@ -5,7 +5,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductDessert
-        fields = ['id', 'name', 'description', 'image', 'price', 'currency']
+        fields = ['id', 'name', 'description', 'image', 'price', 'currency', 'size']
 
 class CategorySerializer(serializers.ModelSerializer):
     subcategories = serializers.SerializerMethodField()

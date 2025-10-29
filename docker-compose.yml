@@ -15,6 +15,17 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: menu_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   web:
     build:
       context: ./backend
@@ -28,53 +39,44 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-
     expose:
       - 8000
     volumes:
-      - ./backend/credentials:/home/app/backend/credentials:ro
+      - ./backend/translate:/home/app/backend/translate:ro
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/media
     restart: always
-
-  nginx:
-    build: ./nginx
-    container_name: menu_nginx
-    restart: always
-    volumes:
-      - ./nginx/html:/usr/share/nginx/html
-      - ./certs:/etc/letsencrypt:ro
-      - static_volume:/home/app/web/staticfiles
-      - media_volume:/home/app/web/media
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - web
-
-  redis:
-    image: redis:7-alpine
-    container_name: menu_redis
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   frontend:
     build:
       context: ./AS_Cikolata
+      dockerfile: Dockerfile
     container_name: menu_frontend
     ports:
-      - "3000:80"  # или другой порт, который будет использовать фронт
+      - "3000:80"
     restart: always
-    volumes:
-      - ./AS_Cikolata:/usr/share/nginx/html
     depends_on:
-      - nginx
+      - web
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: menu_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Файлы билда React
+      - ./AS_Cikolata/dist:/usr/share/nginx/html
+      # Конфиги
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      # SSL-сертификаты
+      - ./certs:/etc/letsencrypt:ro
+      # Django static/media
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/media
+    depends_on:
+      - web
+      - frontend
 
 volumes:
   postgres_data:

@@ -1,17 +1,29 @@
-FROM node:20-alpine
+# Используем образ для React
+FROM node:20 AS build
 
+# Установим рабочую директорию
 WORKDIR /app
 
-# Копируем package.json и package-lock.json для установки зависимостей
-COPY ./package*.json ./
+
+
+# Копируем package.json и устанавливаем зависимости
+COPY package*.json ./
 RUN npm install
 
-# Копируем остальные файлы
-COPY ./ /app/
+# Копируем все исходники
+COPY . .
 
 # Собираем фронтенд
 RUN npm run build
 
-# Используем nginx для работы фронтенда
+# Используем nginx для сервировки статичных файлов
 FROM nginx:alpine
-COPY --from=0 /app/dist /usr/share/nginx/html
+
+# Копируем собранный фронтенд в директорию nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Экспонируем порт
+EXPOSE 80
+
+# Запускаем nginx
+CMD ["nginx", "-g", "daemon off;"]
