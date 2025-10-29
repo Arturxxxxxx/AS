@@ -1,29 +1,17 @@
-# Используем образ для React
-FROM node:16-alpine AS build
+FROM node:20-alpine
 
-# Установим рабочую директорию
 WORKDIR /app
 
-
-
-# Копируем package.json и устанавливаем зависимости
-COPY AS_Cikolata/package*.json ./
+# Копируем package.json и package-lock.json для установки зависимостей
+COPY ./package*.json ./
 RUN npm install
 
-# Копируем все исходники
-COPY ./AS_Cikolata /app/
+# Копируем остальные файлы
+COPY ./ /app/
 
 # Собираем фронтенд
 RUN npm run build
 
-# Используем nginx для сервировки статичных файлов
+# Используем nginx для работы фронтенда
 FROM nginx:alpine
-
-# Копируем собранный фронтенд в директорию nginx
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Экспонируем порт
-EXPOSE 80
-
-# Запускаем nginx
-CMD ["nginx", "-g", "daemon off;"]
+COPY --from=0 /app/dist /usr/share/nginx/html
