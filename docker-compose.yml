@@ -50,15 +50,17 @@ services:
     depends_on:
       - web
 
-  #front:
-   # image: nginx:alpine
-    #container_name: menu_front
-    #restart: always
-    #ports:
-     # - "80:80"
-    #volumes:
-     # - ./dist:/usr/share/nginx/html:ro
-      #- ./dist/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  frontend:
+    build:
+      context: ./AS_Cikolata
+    container_name: menu_frontend
+    ports:
+      - "3000:80"  # или другой порт, который будет использовать фронт
+    restart: always
+    volumes:
+      - ./AS_Cikolata:/usr/share/nginx/html
+    depends_on:
+      - nginx
 
 volumes:
   postgres_data:
