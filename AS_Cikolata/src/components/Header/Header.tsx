@@ -1,5 +1,5 @@
 import styles from "./Header.module.scss";
-import LogoBanner from "../../assets/Logo/Group1.svg";
+import LogoBanner from "../../assets/Logo/Group 1.svg";
 
 const Header = () => {
   return (
